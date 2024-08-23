@@ -1,0 +1,25 @@
+{
+  "name": "vite-template-solid",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite build --watch",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@crxjs/vite-plugin": "2.0.0-beta.25",
+    "@types/chrome": "^0.0.270",
+    "solid-devtools": "^0.30.1",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2",
+    "vite-plugin-solid": "^2.10.2"
+  },
+  "dependencies": {
+    "@edsolater/fnkit": "^0.2.0",
+    "solid-js": "^1.8.21"
+  }
+}
