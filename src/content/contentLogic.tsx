@@ -14,10 +14,11 @@
 //     }
 //   })
 // })
-
-// Listen for messages from other tabs
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "command:requestActiveTabCurrentDomain") {
-    sendResponse({ currentUrl: window.location.href, title: document.title })
-  }
-})
+export function contentLogic() {
+  // Listen for messages from other tabs
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === "command:requestActiveTabCurrentDomain") {
+      sendResponse({ currentUrl: window.location.href, title: document.title })
+    }
+  })
+}
