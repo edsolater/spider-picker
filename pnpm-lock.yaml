@@ -9,8 +9,11 @@ importers:
   .:
     dependencies:
       '@edsolater/fnkit':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.2.1
+        version: 0.2.1
+      '@edsolater/pivkit':
+        specifier: ^0.0.27
+        version: 0.0.27(solid-js@1.8.21)
       solid-js:
         specifier: ^1.8.21
         version: 1.8.21
@@ -134,8 +137,13 @@ packages:
   '@crxjs/vite-plugin@2.0.0-beta.25':
     resolution: {integrity: sha512-g5ytTNiFpFCi+T0trSDJLohVz5PufLBLh6OGljyGTHkQCKiApuEgZ1bAjgPXluMDhMUvbPfZT10LYl5ROefXog==}
 
-  '@edsolater/fnkit@0.2.0':
-    resolution: {integrity: sha512-YMQZqwWY/QNUKLmmqzygmLdGHqvE3SscRq6Y1Q5avocMG6UqUAiT5HD9x1v2iYrsyIuZO/DCWC38iitgqCLysg==}
+  '@edsolater/fnkit@0.2.1':
+    resolution: {integrity: sha512-df78oQved4filNnL9YnIi0SbiBGHnJuJ17yj3YGg0E2Xd/3VxUgIBR1dAbFgTcqxUCf5lrsudmgxECg1yZ2xwg==}
+
+  '@edsolater/pivkit@0.0.27':
+    resolution: {integrity: sha512-wFWb9M3W+z1WvfwgINLHoFk089T1VLwLXWQjKiU9yVx7UJvh/U9DA9nanEohAWIESYcmcwsT8qBvn3jgTDsbIg==}
+    peerDependencies:
+      solid-js: ^1.6.0
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -673,6 +681,11 @@ packages:
     resolution: {integrity: sha512-WOBp/EEGUiIsJSp7wcv/y6MO+lV9UoncWqxuFfm8eBwzWNgyfBd6Gz+IeKQ9jCmyhoH99g15M3T+QaVHFjizVA==}
     engines: {node: '>=4'}
 
+  goober@2.1.14:
+    resolution: {integrity: sha512-4UpC0NdGyAFqLNPnhCT2iHpza2q+RAY3GV85a/mRPdzyPQMsj0KmMMuetdIkzWRbJ+Hgau1EZztq8ImmiMGhsg==}
+    peerDependencies:
+      csstype: ^3.0.10
+
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
@@ -1123,7 +1136,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@edsolater/fnkit@0.2.0': {}
+  '@edsolater/fnkit@0.2.1': {}
+
+  '@edsolater/pivkit@0.0.27(solid-js@1.8.21)':
+    dependencies:
+      '@edsolater/fnkit': 0.2.1
+      csstype: 3.1.3
+      goober: 2.1.14(csstype@3.1.3)
+      solid-js: 1.8.21
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
@@ -1629,6 +1649,10 @@ snapshots:
       is-glob: 4.0.3
 
   globals@11.12.0: {}
+
+  goober@2.1.14(csstype@3.1.3):
+    dependencies:
+      csstype: 3.1.3
 
   graceful-fs@4.2.11: {}
 

@@ -1,24 +1,32 @@
-// // Register the current tab's domain with the background script
-// chrome.runtime.sendMessage({ type: "register:tabId" }, (response) => {
-//   if (response.status === "registered") {
-//     console.log("Tab id registered in background script")
-//   }
-// })
 
-// // Listen for visibility change events
-// document.addEventListener("visibilitychange", () => {
-//   // Notify background script when the page becomes inactive
-//   chrome.runtime.sendMessage({ type: "register:pageActivityChange", active: document.hidden }, (response) => {
-//     if (response.status === "notified") {
-//       console.log("Background script notified of page activity change")
-//     }
-//   })
-// })
 export function contentLogic() {
-  // Listen for messages from other tabs
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.type === "command:requestActiveTabCurrentDomain") {
-      sendResponse({ currentUrl: window.location.href, title: document.title })
+  chrome.runtime.sendMessage({ type: "register:tabId" }, (response) => {
+    if (response.status === "registered") {
+      console.info("Tab id registered in background script")
+    }
+  })
+
+  Object.assign(window, { proxyPostPorter: portManager })
+}
+
+function postToMessageToTab(message: { url: string;  data: any }) {
+  chrome.runtime.sendMessage(
+    { type: "proxyPost:postToMessageToTab", url: message.url, data: message.data },
+    (response) => {
+      if (response.status === "success") {
+        console.log("Message sent to tab")
+      }
+    },
+  )
+}
+
+function addEventListenerForProxyPost(cb: (messageData: any) => void) {
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message.type === "proxyPost:postToMessageToTab") {
+      message.data && cb(message.data)
     }
   })
 }
+
+const portManager = { postMessage: postToMessageToTab, addMessageListener: addEventListenerForProxyPost }
+Object.assign(window, { proxyPostPorter: portManager })

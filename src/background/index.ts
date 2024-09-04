@@ -1,41 +1,32 @@
-// // Store tab ID and domain mapping
-// /**
-//  * @type {Set<number>}
-//  */
-// let tabIds = new Set()
-// let activeTabIds = new Set() // current only one active tab
 
-// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-//   if (message.type === "register:tabId") {
-//     // Register the domain for the tab
-//     if (sender.tab?.id != null) {
-//       tabIds.add(sender.tab.id)
-//       sendResponse({ status: "registered" })
-//     }
-//   } else if (message.type === "register:pageActivityChange") {
-//     if (message.active) {
-//       activeTabIds.add(sender.tab?.id)
-//     } else {
-//       activeTabIds.delete(sender.tab?.id)
-//     }
-//   }
-// })
+// Store tab ID and domain mapping
+const tabIds = new Map<string /* URL */, number | undefined>()
 
-// // register Broadcast message(define in content.js) to all tabs
-// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-//   if (message.type === "broadcastRequest") {
-//     // Broadcast message to all other tabs
-//     for (const id of tabIds) {
-//       if (id != null && id != sender.tab?.id) {
-//         chrome.tabs.sendMessage(id, {
-//           type: "message",
-//           isBroadcast: true,
-//           data: message.data,
-//         })
-//       }
-//     }
-//   }
-// })
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  const [type, command] = message.type.split(":")
+  if (type === "register") {
+    // Register the domain for the tab
+    if (command === "tabId" && sender.tab?.id != null && sender.url != null) {
+      tabIds.set(sender.url, sender.tab.id)
+      sendResponse({ status: "registered" })
+    }
+  }
+  if (type === "proxyPost") {
+    if (command === "postToMessageToTab") {
+      const targetTabId = tabIds.get(message.url)
+      if (targetTabId != null) {
+        sendResponse({ status: "success" })
+        chrome.tabs.sendMessage(targetTabId, message.data)
+      } else {
+        console.error("Tab ID not found for URL: ", message.url, "maybe not registered yet")
+        sendResponse({ status: "error", message: "Tab ID not found for URL" })
+      }
+    }
+  }
+})
+
+// register Broadcast message(define in content.js) to all tabs
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {})
 
 // background.js request activeTab
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
