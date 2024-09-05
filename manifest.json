@@ -1,9 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "CRXJS Spider Picker",
-  "version": "0.2.0",
-  "description": "get all links in the page",
-
+  "name": "Cross Tab Speaker",
+  "version": "0.0.1",
+  "description": "stransport messages between tabs",
   "permissions": ["tabs", "activeTab", "webRequest", "scripting", "sidePanel", "storage"],
   "host_permissions": ["<all_urls>"],
 

@@ -1,31 +1,28 @@
-import { createSubscribable, setItem } from "@edsolater/fnkit"
-import { Box, Button, List, useSubscribable, Text } from "@edsolater/pivkit"
-import { createEffect } from "solid-js"
+import { createSubscribable, isMap } from "@edsolater/fnkit"
+import { Box, List, Text, useSubscribable } from "@edsolater/pivkit"
+import { onMount } from "solid-js"
 
-const defaultRecords = new Map<string, { url: string; title: string }>()
-const recordsS = createSubscribable(defaultRecords)
+const recordsS = createSubscribable(new Map<string, chrome.tabs.Tab>())
 
 export default function App() {
-  function runCommandRequestActiveTabCurrentDomain() {
-    chrome.runtime.sendMessage({ type: "command:requestActiveTabCurrentDomain" }, (response) => {
-      if (response?.currentUrl && response?.title) {
-        recordsS.set((prev) => setItem(prev, response.currentUrl, { url: response.currentUrl, title: response.title }))
+  onMount(() => {
+    chrome.runtime.sendMessage({ type: "sidebarQuery", command: "queryTabInfos" }, (response) => {
+      if (response.status === "success") {
+        const tabInfos = response.data.tabs as Map<string, chrome.tabs.Tab>
+        console.log("tabInfos: ", isMap(tabInfos), response)
+        recordsS.set(tabInfos)
       }
     })
-  }
-  const [records] = useSubscribable(recordsS)
-  createEffect(() => {
-    console.log("records(): ", records())
   })
+
+  const [records] = useSubscribable(recordsS)
   return (
     <div>
-      <Button onClick={runCommandRequestActiveTabCurrentDomain}>Record Url</Button>
-
       <List items={records}>
         {([, record]) => (
-          <Box>
-            <Text icss={{ fontSize: "1.4em" }}>{record.url.slice(0, 12)}</Text>
+          <Box icss={{ display: "flex", gap: ".2rem" }}>
             <Text>{record.title}</Text>
+            <Text>{record.id}</Text>
           </Box>
         )}
       </List>
