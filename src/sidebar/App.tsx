@@ -6,7 +6,7 @@ const recordsS = createSubscribable(new Map<string, chrome.tabs.Tab>())
 
 export default function App() {
   onMount(() => {
-    chrome.runtime.sendMessage({ type: "sidebarQuery", command: "queryTabInfos" }, (response) => {
+    chrome.runtime.sendMessage({ command: "queryTabInfos" }, (response) => {
       if (response.status === "success") {
         const tabInfos = response.data.tabs as Map<string, chrome.tabs.Tab>
         console.log("tabInfos: ", isMap(tabInfos), response)
@@ -18,10 +18,10 @@ export default function App() {
   const [records] = useSubscribable(recordsS)
   return (
     <div>
-      <List items={records} icss={{ display:'flex', flexDirection:'column', gap:'.25em'}}>
+      <List items={records} icss={{ display: "flex", flexDirection: "column", gap: ".25em" }}>
         {([, record]) => (
           <Box icss={{ display: "flex", gap: ".2rem" }}>
-            <Text icss={{fontWeight:'700'}}>{record.title?.slice(0, 30)}</Text>
+            <Text icss={{ fontWeight: "700" }}>{record.title?.slice(0, 30)}</Text>
             <Text>{record.id}</Text>
           </Box>
         )}

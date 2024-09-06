@@ -3,9 +3,8 @@ import { Box, renderAsHTMLH1, Text } from "@edsolater/pivkit"
 export default function App() {
   const useMethod = `
     window.postMessage({
-      type: "extension:cross-tab-message",
-      to: {tabId:"18782991"}, 
-      command: "predefined command in extension content.js",
+      to: { tabId: 18782991 }, 
+      command: "extension:cross-tab-speaker.send-message",
       data: "any JSON serializable data"
     })
   `

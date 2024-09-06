@@ -1,58 +1,73 @@
 import { isObject } from "@edsolater/fnkit"
+import { deserializeData, serializeData } from "../utils/serialize"
 
 export function contentLogic() {
-  chrome.runtime.sendMessage({ type: "register", command: "registerTabId" }, (response) => {
+  chrome.runtime.sendMessage({ command: "registerTabId" }, (response) => {
     if (response.status === "registered") {
       console.info("Tab id registered in background script")
     }
   })
 
+  // receive message from background script
+  chrome.runtime.onMessage.addListener((message) => {
+    if (isObject(message)) {
+      const { command, data, from } = message as any
+      if (command === "messageFromBackground") {
+        window.postMessage({
+          command: "extension:cross-tab-speaker.receive-message",
+          from: from.id,
+          data: deserializeData(data),
+        })
+      }
+    }
+  })
+
   // delete current tab id when tab is closed
   window.addEventListener("unload", () => {
-    chrome.runtime.sendMessage({ type: "register", command: "unregisterTabId" }, (response) => {
+    chrome.runtime.sendMessage({ command: "unregisterTabId" }, (response) => {
       if (response.status === "unregistered") {
         console.info("Tab id unregistered in background script")
       }
     })
   })
 
+  // receive message from other tabs
+  console.log("✨ register onMessage event listener")
   window.addEventListener("message", (event) => {
     if (!isObject(event.data)) return
-    const { command, type, data, to } = event.data as MessageSpeakerItem
-    if (type === "extension:cross-tab-speaker") {
-      postToMessageToTab({ tabId: to.tabId, data })
+    const { command, data, to } = event.data as MessageSpeakerItem
+    if (command === "extension:cross-tab-speaker.send-message") {
+      postToMessageToTab({ tabId: to?.tabId, data })
     }
+  })
+  window.postMessage({
+    command: "extension:cross-tab-speaker.status:ready",
+    data: "content script is ready",
   })
 }
 
-type MessageSpeakerItem = {
-  type: "extension:cross-tab-speaker"
-  to: { tabId: number }
-  command: "cross-speak"
+interface MessageItem {
+  command: string // command of message (e.g. "respeak")
+  status?: string // status of message (e.g. "success")
+  data: any // message data
+}
+
+interface MessageSpeakerItem extends MessageItem {
+  to?: { tabId?: number }
+  command:
+    | "extension:cross-tab-speaker.send-message"
+    | "extension:cross-tab-speaker.receive-message"
+    | "extension:cross-tab-speaker.status:ready"
   data: any
 }
 
-function postToMessageToTab(message: { tabId: number; data: any }) {
+function postToMessageToTab(message: { tabId?: number; data: any }) {
   chrome.runtime.sendMessage(
-    { type: "speak", command: "postMessageToTab", tabId: message.tabId, data: message.data },
+    { command: "postMessageToTab", tabId: message.tabId, data: serializeData(message.data) },
     (response) => {
       if (response.status === "success") {
-        console.log("Message sent to tab")
+        console.log("background: message has sent to tab")
       }
     },
   )
-}
-
-function addEventListenerForProxyPost(cb: (messageData: any) => void) {
-  const callback: (
-    message: any,
-    sender: chrome.runtime.MessageSender,
-    sendResponse: (response?: any) => void,
-  ) => void = (message) => {
-    if (message.type === "proxyPost:postToMessageToTab") {
-      message.data && cb(message.data)
-    }
-  }
-  chrome.runtime.onMessage.addListener(callback)
-  return { removeListener: () => chrome.runtime.onMessage.removeListener(callback) }
 }
