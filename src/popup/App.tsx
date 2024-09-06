@@ -4,7 +4,7 @@ export default function App() {
   const useMethod = `
     window.postMessage({
       type: "extension:cross-tab-message",
-      to: "https://github.com/edsolater"
+      to: {tabId:"18782991"}, 
       command: "predefined command in extension content.js",
       data: "any JSON serializable data"
     })

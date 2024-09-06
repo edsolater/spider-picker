@@ -18,10 +18,10 @@ export default function App() {
   const [records] = useSubscribable(recordsS)
   return (
     <div>
-      <List items={records}>
+      <List items={records} icss={{ display:'flex', flexDirection:'column', gap:'.25em'}}>
         {([, record]) => (
           <Box icss={{ display: "flex", gap: ".2rem" }}>
-            <Text>{record.title}</Text>
+            <Text icss={{fontWeight:'700'}}>{record.title?.slice(0, 30)}</Text>
             <Text>{record.id}</Text>
           </Box>
         )}

@@ -18,17 +18,23 @@ export function contentLogic() {
 
   window.addEventListener("message", (event) => {
     if (!isObject(event.data)) return
-    const { command, type, data, to } = event.data as any
+    const { command, type, data, to } = event.data as MessageSpeakerItem
     if (type === "extension:cross-tab-speaker") {
-      postToMessageToTab({ url: to, data })
+      postToMessageToTab({ tabId: to.tabId, data })
     }
   })
-
 }
 
-function postToMessageToTab(message: { url: string; data: any }) {
+type MessageSpeakerItem = {
+  type: "extension:cross-tab-speaker"
+  to: { tabId: number }
+  command: "cross-speak"
+  data: any
+}
+
+function postToMessageToTab(message: { tabId: number; data: any }) {
   chrome.runtime.sendMessage(
-    { type: "speak", command: "postMessageToTab", url: message.url, data: message.data },
+    { type: "speak", command: "postMessageToTab", tabId: message.tabId, data: message.data },
     (response) => {
       if (response.status === "success") {
         console.log("Message sent to tab")
