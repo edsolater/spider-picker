@@ -1,26 +1,36 @@
-import { createSubscribable, isObject } from "@edsolater/fnkit"
+import { createSubscribable } from "@edsolater/fnkit"
 import { deserializeData, serializeData } from "../utils/serialize"
 
-export function contentLogic() {
+/** 
+ * all action should handle after mainThread connected
+ */
+function waveWithMainThread() {
   const isInnerJSReady = createSubscribable(false)
-
   isInnerJSReady.subscribe((isReady) => {
     if (isReady) {
       console.info("✨[content.js] inner js is ready")
       window.postMessage({
         command: "extension:cross-tab-speaker.status:ready",
-        data: "content script is ready",
       })
     }
   })
-
-  // init action
+  window.addEventListener("message", ({ data: message }) => {
+    if (message.command === "mainThread.status:ready") {
+      console.log("[content.js] receive signal: main thread is ready")
+      isInnerJSReady.set(true)
+    }
+  })
+  // init message action
   Promise.resolve().then(() => {
     window.postMessage({
       command: "extension:cross-tab-speaker.status:ready",
-      data: "content script is ready",
     })
   })
+  return isInnerJSReady
+}
+
+export function contentLogic() {
+  const isMainThreadReady = waveWithMainThread()
 
   chrome.runtime.sendMessage({ command: "registerTabId" }, (response) => {
     if (response.status === "registered") {
@@ -30,18 +40,15 @@ export function contentLogic() {
 
   // receive message from background script
   chrome.runtime.onMessage.addListener(async (message) => {
-    if (isObject(message)) {
-      const { command, data, from } = message as any
-      if (command === "messageFromBackground") {
-        console.info("[content.js] receive message from background: ", data)
-        const deserializedData = await deserializeData(data)
-        console.info("[content.js] deserializedData: ", deserializedData)
-        window.postMessage({
-          command: "extension:cross-tab-speaker.receive-message",
-          from: from.id,
-          data: deserializedData,
-        })
-      }
+    if (message?.command === "messageFromBackground") {
+      console.info("[content.js] receive message from background: ", message?.data)
+      const deserializedData = await deserializeData(message?.data)
+      console.info("[content.js] deserializedData: ", deserializedData)
+      window.postMessage({
+        command: "extension:cross-tab-speaker.receive-message",
+        from: message?.from.id,
+        data: deserializedData,
+      })
     }
   })
 
@@ -57,10 +64,6 @@ export function contentLogic() {
   // receive message from other tabs
   console.log("✨[content.js] register onMessage event listener")
   window.addEventListener("message", ({ data: message }) => {
-    if (message.command === "mainThread.status:ready") {
-      console.log("[content.js] receive signal: main thread is ready")
-      isInnerJSReady.set(true)
-    }
     if (message?.command === "extension:cross-tab-speaker.send-message") {
       console.log("[content.js] receive data: ", message.data)
       postToMessageToTab({ tabId: message.to?.tabId, data: message.data })
