@@ -1,37 +1,6 @@
-import { createSubscribable } from "@edsolater/fnkit"
 import { deserializeData, serializeData } from "../utils/serialize"
 
-/** 
- * all action should handle after mainThread connected
- */
-function waveWithMainThread() {
-  const isInnerJSReady = createSubscribable(false)
-  isInnerJSReady.subscribe((isReady) => {
-    if (isReady) {
-      console.info("✨[content.js] inner js is ready")
-      window.postMessage({
-        command: "extension:cross-tab-speaker.status:ready",
-      })
-    }
-  })
-  window.addEventListener("message", ({ data: message }) => {
-    if (message.command === "mainThread.status:ready") {
-      console.log("[content.js] receive signal: main thread is ready")
-      isInnerJSReady.set(true)
-    }
-  })
-  // init message action
-  Promise.resolve().then(() => {
-    window.postMessage({
-      command: "extension:cross-tab-speaker.status:ready",
-    })
-  })
-  return isInnerJSReady
-}
-
 export function contentLogic() {
-  const isMainThreadReady = waveWithMainThread()
-
   chrome.runtime.sendMessage({ command: "registerTabId" }, (response) => {
     if (response.status === "registered") {
       console.info("Tab id registered in background script")
@@ -70,13 +39,11 @@ export function contentLogic() {
     }
   })
 }
-
 interface MessageItem {
   command: string // command of message (e.g. "respeak")
   status?: string // status of message (e.g. "success")
   data: any // message data
 }
-
 interface MessageSpeakerItem extends MessageItem {
   to?: { tabId?: number }
   command:

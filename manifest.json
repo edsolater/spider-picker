@@ -17,7 +17,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": ["https://github.com/*", "http://localhost/*", "https://*.vercel.app/*"],
       "js": ["src/content/index.tsx"]
     }
   ]
