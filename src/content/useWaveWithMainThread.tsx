@@ -4,7 +4,7 @@ import { useSubscribable } from "@edsolater/pivkit"
 /**
  * all action should handle after mainThread connected
  */
-function waveWithMainThread() {
+function shakeHandWithMainThread() {
   const isMainThreadJSReady = createSubscribable(false)
   const isExtensionJSReady = createSubscribable(false)
   isMainThreadJSReady.subscribe((isReady) => {
@@ -28,12 +28,12 @@ function waveWithMainThread() {
     })
     isExtensionJSReady.set(true)
   })
-  return { isMainReady: isMainThreadJSReady, isExtensionReady: isExtensionJSReady }
+  return { isMainThreadShaked: isMainThreadJSReady, isExtensionReady: isExtensionJSReady }
 }
 
 export const useWaveWithMainThread = () => {
-  const { isMainReady, isExtensionReady } = waveWithMainThread()
-  const [isMainThreadReady] = useSubscribable(isMainReady)
+  const { isMainThreadShaked, isExtensionReady } = shakeHandWithMainThread()
+  const [isMainThreadReady] = useSubscribable(isMainThreadShaked)
   const [isExtensionJSReady] = useSubscribable(isExtensionReady)
   return { isMainReady: isMainThreadReady, isExtensionReady: isExtensionJSReady }
 }
