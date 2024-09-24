@@ -1,21 +1,10 @@
-import { createEffect, onMount } from "solid-js"
-import { contentLogic } from "./retransformMessage"
-import { useWaveWithMainThread } from "./useWaveWithMainThread"
 import { Box, Group, Panel, Text } from "@edsolater/pivkit"
+import { onMount } from "solid-js"
+import { runContentLogicCode } from "./commands"
 
 export default function App() {
-  const { isMainReady, isExtensionReady } = useWaveWithMainThread()
-
   onMount(() => {
-    contentLogic()
-  })
-
-  createEffect(() => {
-    console.log("[extension:Cross-Tab-Speaker] isReady: ", isExtensionReady())
-  })
-
-  createEffect(() => {
-    console.log("[extension:Cross-Tab-Speaker] isMainReady: ", isMainReady())
+    runContentLogicCode()
   })
 
   return (
@@ -40,12 +29,7 @@ export default function App() {
       }}
     >
       <Group icss={{ display: "flex", gap: ".5rem", alignItems: "center" }}>
-        <StatusDot isReady={isExtensionReady()} />
         <Text>is extension ready</Text>
-      </Group>
-      <Group icss={{ display: "flex", gap: ".5rem", alignItems: "center" }}>
-        <StatusDot isReady={isMainReady()} />
-        <Text>main thread has shake hand</Text>
       </Group>
     </Panel>
   )
